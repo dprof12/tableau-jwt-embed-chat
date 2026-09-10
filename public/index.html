@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau Server JWT Embed Portal</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Tableau Embedding API v3 Module -->
+  <script type="module" src="https://data-statistik.jakarta.go.id/javascripts/api/tableau.embedding.3.latest.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-badge">JWT</div>
+        <div class="brand-text">
+          <h1>Tableau Server Embed Portal</h1>
+          <span class="sub-text">Connected Apps Direct Trust • Guest Mode Disabled</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="status-chip" id="serverChip">
+          <span class="dot"></span>
+          <span class="label">Server:</span>
+          <span class="val" id="serverHost">Loading...</span>
+        </div>
+        <div class="status-chip active" id="jwtStatusChip">
+          <span class="dot"></span>
+          <span class="label">JWT:</span>
+          <span class="val" id="tokenStatusText">Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Interactive Embed Toolbar -->
+    <section class="toolbar-section">
+      <div class="toolbar-card">
+        <div class="input-group url-group">
+          <label for="viewUrlInput">Tableau View URL</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔗</span>
+            <input 
+              type="text" 
+              id="viewUrlInput" 
+              placeholder="https://data-statistik.jakarta.go.id/views/Superstore/Overview"
+              value="https://data-statistik.jakarta.go.id/views/Superstore/Overview"
+            >
+          </div>
+        </div>
+
+        <div class="input-group user-group">
+          <label for="usernameInput">User Identity (sub)</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input 
+              type="text" 
+              id="usernameInput" 
+              placeholder="satudata"
+              value="satudata"
+            >
+          </div>
+        </div>
+
+        <div class="actions-group">
+          <button id="btnEmbed" class="btn btn-primary">
+            <span class="btn-icon">⚡</span>
+            <span>Embed & Auth</span>
+          </button>
+          <button id="btnRefreshToken" class="btn btn-secondary" title="Perbarui JWT Token">
+            <span class="btn-icon">🔄</span>
+            <span>Refresh Token</span>
+          </button>
+          <button id="btnToggleDetails" class="btn btn-ghost" title="Lihat Payload Token">
+            <span class="btn-icon">🔍</span>
+            <span>Token Details</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Preset Chips -->
+      <div class="preset-chips">
+        <span class="preset-label">Quick Views:</span>
+        <button class="chip-btn active" data-url="https://data-statistik.jakarta.go.id/views/Superstore/Overview">Superstore / Overview</button>
+        <button class="chip-btn" data-url="https://data-statistik.jakarta.go.id/views/Regional/GlobalSales">Regional / GlobalSales</button>
+        <span class="custom-hint">💡 Atau paste link view Tableau Server Anda sendiri di kolom atas.</span>
+      </div>
+    </section>
+
+    <!-- Token Diagnostics Drawer (Collapsible) -->
+    <section id="tokenDetailsDrawer" class="details-drawer hidden">
+      <div class="drawer-content">
+        <div class="drawer-header">
+          <h3>🔐 Decoded JWT Token Diagnostics</h3>
+          <button id="btnCloseDetails" class="btn-close">&times;</button>
+        </div>
+        <div class="token-grid">
+          <div class="token-box">
+            <h4>Header (JOSE)</h4>
+            <pre id="tokenHeaderDisplay">// Header data will appear here</pre>
+          </div>
+          <div class="token-box">
+            <h4>Payload (Claims)</h4>
+            <pre id="tokenPayloadDisplay">// Payload data will appear here</pre>
+          </div>
+          <div class="token-box full-width">
+            <h4>Raw Encoded JWT</h4>
+            <div class="raw-token-container">
+              <code id="rawTokenDisplay">None generated yet</code>
+              <button id="btnCopyToken" class="btn-copy">Salin Token</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Tableau Visualization Container -->
+    <main class="viz-wrapper">
+      <!-- Loading State Overlay -->
+      <div id="loadingOverlay" class="viz-overlay hidden">
+        <div class="spinner"></div>
+        <div class="overlay-text">
+          <h4>Mengotentikasi & Memuat Dashboard...</h4>
+          <p id="overlaySubText">Menghubungkan token JWT ke Tableau Connected Apps</p>
+        </div>
+      </div>
+
+      <!-- Error State Overlay -->
+      <div id="errorOverlay" class="viz-overlay error-state hidden">
+        <div class="error-icon">⚠️</div>
+        <h4 id="errorTitle">Gagal Memuat Tableau View</h4>
+        <p id="errorMessage">Terjadi kendala saat menghubungkan token JWT ke Tableau Server.</p>
+        <div class="error-actions">
+          <button id="btnRetry" class="btn btn-primary">Coba Lagi</button>
+          <a href="https://data-statistik.jakarta.go.id" target="_blank" class="btn btn-secondary">Buka Tableau Server Tab Baru</a>
+        </div>
+        <div class="error-tips">
+          <h5>💡 Hal yang perlu diperiksa:</h5>
+          <ul>
+            <li>Apakah Connected App di Tableau Server sudah berstatus <strong>Enabled</strong>?</li>
+            <li>Pastikan <strong>User Identity</strong> (<code>satudata</code>) terdaftar dan memiliki lisensi Viewer/Explorer/Creator di Tableau Server.</li>
+            <li>Pastikan user tersebut memiliki izin akses (Permissions) pada Workbook/View target.</li>
+            <li>Jika browser memblokir Third-Party Cookie, izinkan cookie atau buka Tableau Server sekali di tab baru.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Empty State before initial load -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-art">📊</div>
+        <h3>Siap Menampilkan Dashboard</h3>
+        <p>Pastikan URL View dan Username sudah benar, lalu klik tombol <strong>Embed & Auth</strong> di atas.</p>
+      </div>
+
+      <!-- Live Tableau Viz Container -->
+      <div id="tableauVizMount" class="viz-mount"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div>Tableau Connected Apps (Direct Trust) • Embedded API v3 • DKI Jakarta Big Data</div>
+      <div id="countdownText" class="countdown-text">Token Expiry: -</div>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
