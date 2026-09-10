@@ -68,6 +68,9 @@ app.get('/api/config', (req, res) => {
   });
 });
 
+// Endpoint to inspect WAF block response and extract Support ID
+app.get('/api/check-waf', require('./api/check-waf'));
+
 // Endpoint to generate JWT token on demand
 app.post('/api/tableau-token', (req, res) => {
   try {
