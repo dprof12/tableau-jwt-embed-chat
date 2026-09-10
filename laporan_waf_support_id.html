@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>WAF Block Report - Support ID 435440845153598883</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-repeat: no-repeat;
+            background-color: #ffc741;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 23px;
+            margin: auto;
+            border-color: #fff;
+            width: 400px;
+            font-weight: bold;
+        }
+
+        .content {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 500px;
+        }
+
+        .red-box {
+            width: 359px;
+            padding: 1px;
+            height: 45px;
+            background-color: red;
+            border-radius: 30px;
+            margin: 15px auto;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h3 {
+            color: red;
+            text-align: center;
+            font-size: 20px;
+            margin: auto;
+            width: 220px;
+            padding: 8px;
+            background-color: #f3f4f6;
+            border-radius: 20px;
+        }
+
+        a {
+            color: black;
+            text-decoration: underline;
+        }
+
+        .tech-info {
+            margin-top: 20px;
+            text-align: left;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .tech-info code {
+            font-family: monospace;
+            background: #e2e8f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <h2><span>&#9888;</span> URL YANG DIMINTA DI TOLAK <span>&#9888;</span></h2>
+        <p><b>Silahkan Konsultasikan dengan Call Center UP Layanan Teknologi Informasi dan Komunikasi</b></p>
+            
+        <div class="red-box">
+            <p style="margin: 0; font-weight: bold;">Support ID Anda : <span id="sp-id">435440845153598883</span></p>
+        </div>
+
+        <b>Klik Nomor Dibawah Untuk Menghubungi Call Center</b><br/><br/>
+        <h3><a id="wa_ccltik" href="https://api.whatsapp.com/send/?phone=6281313588684&text=Halo%20Admin%20Saya%20terkena%20Support%20id%20435440845153598883" target="_blank">&#128222; +6281313588684</a></h3>
+        <p style="font-size: 13px; color: #4b5563; margin-top: 15px;">
+            UP Layanan Teknologi Informasi dan Komunikasi<br> Diskominfotik Provinsi DKI Jakarta<br>
+            Website: <a href="https://servicedesk.jakarta.go.id/" target="_blank">servicedesk.jakarta.go.id</a>
+        </p>
+
+        <div class="tech-info">
+            <strong>Detail Teknis Request yang Terblokir:</strong><br>
+            • <strong>URL:</strong> <code>https://data-statistik.jakarta.go.id/vizportal/api/web/v1/auth/embed/signin</code><br>
+            • <strong>HTTP Method:</strong> <code>OPTIONS</code> (CORS Preflight)<br>
+            • <strong>Origin:</strong> <code>https://tableau-jwt-embed-chat.vercel.app</code>
+        </div>
+    </div>
+</body>
+</html>
