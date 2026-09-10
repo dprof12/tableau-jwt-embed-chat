@@ -31,11 +31,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Load Server Config
   async function loadConfig() {
+    console.log('🔄 [Tableau] Memuat konfigurasi dari /api/config...');
     try {
       const res = await fetch('/api/config');
+      console.log('📡 [Tableau] /api/config response status:', res.status);
       const data = await res.json();
+      console.log('✅ [Tableau] Data konfigurasi diterima:', data);
+      
       if (data.serverUrl) {
-        serverHostEl.textContent = new URL(data.serverUrl).hostname;
+        try {
+          serverHostEl.textContent = new URL(data.serverUrl).hostname;
+        } catch(e) {
+          serverHostEl.textContent = data.serverUrl;
+        }
       }
       if (data.defaultViewUrl && !viewUrlInput.value) {
         viewUrlInput.value = data.defaultViewUrl;
@@ -44,33 +52,37 @@ document.addEventListener('DOMContentLoaded', () => {
         usernameInput.value = data.defaultUsername;
       }
     } catch (err) {
-      console.warn('Failed to load /api/config:', err);
+      console.error('❌ [Tableau] Gagal memuat /api/config:', err);
       serverHostEl.textContent = 'Offline';
     }
   }
 
   // 2. Fetch JWT Token from Backend
   async function fetchToken(username) {
+    const targetUser = (username || '').trim() || 'satudata';
+    console.log(`🔐 [Tableau] Meminta token JWT untuk user: "${targetUser}"...`);
     updateStatus('generating', 'Generating Token...');
     try {
       const res = await fetch('/api/tableau-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim() })
+        body: JSON.stringify({ username: targetUser })
       });
+      console.log('📡 [Tableau] /api/tableau-token response status:', res.status);
       const data = await res.json();
 
       if (!data.success) {
-        throw new Error(data.error || 'Failed to generate token');
+        throw new Error(data.error || 'Server menolak request pembuatan token');
       }
 
+      console.log('🎉 [Tableau] Token JWT berhasil didapatkan! Masa aktif hingga:', data.expiresAt);
       currentTokenData = data;
       displayTokenDetails(data.token);
       startCountdown(data.expiresAt);
       updateStatus('valid', 'Valid Token');
       return data.token;
     } catch (err) {
-      console.error('Token fetch error:', err);
+      console.error('❌ [Tableau] Error saat fetch token:', err);
       updateStatus('error', 'Token Error');
       showError(`Gagal men-generate JWT Token: ${err.message}`);
       throw err;
@@ -101,10 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
     showLoading('Membuat sesi autentikasi JWT Connected Apps...');
 
     try {
+      console.log('🚀 [Tableau] Memulai mountViz dengan URL:', viewUrl);
       // Step A: Dapatkan token baru
       const token = await fetchToken(username);
 
       showLoading('Menginisialisasi Tableau Embedding API v3...');
+      console.log('🎨 [Tableau] Memasang elemen <tableau-viz>...');
 
       // Step B: Bersihkan viz lama jika ada
       vizMount.innerHTML = '';
@@ -122,26 +136,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Event Listeners dari Tableau Embedding API v3
       viz.addEventListener('firstinteractive', (event) => {
-        console.log('✅ Tableau Viz is interactive:', event);
+        console.log('🎉🎉 [Tableau] FIRST INTERACTIVE! Dashboard berhasil termuat penuh!', event);
         hideLoading();
         updateStatus('valid', 'Connected & Active');
       });
 
+      viz.addEventListener('firstvizsizeknown', (event) => {
+        console.log('📐 [Tableau] Dashboard size detected:', event);
+      });
+
       viz.addEventListener('vizerror', (event) => {
-        console.error('❌ Tableau Viz Error:', event);
+        console.error('❌ [Tableau] Viz Error Event:', event);
         hideLoading();
         updateStatus('error', 'Embedding Error');
         const detail = event.detail ? JSON.stringify(event.detail) : 'Viz Error';
         showError(`Tableau Server mengembalikan error: ${detail}`);
       });
 
-      // Safety timeout: jika 15 detik belum interactive, sembunyikan loading agar user bisa lihat pesan dari Tableau
+      // Safety timeout: jika 10 detik belum interactive, tetap sembunyikan loading overlay
+      // agar iframe Tableau di bawahnya terlihat (jika Tableau menampilkan pesan/login box sendiri)
       setTimeout(() => {
+        console.log('⏱️ [Tableau] Safety timeout tercapai, memastikan loading overlay disembunyikan.');
         hideLoading();
-      }, 15000);
+      }, 8000);
 
       activeViz = viz;
       vizMount.appendChild(viz);
+      console.log('✅ [Tableau] <tableau-viz> sukses di-mount ke DOM.');
 
     } catch (err) {
       hideLoading();
