@@ -76,6 +76,10 @@
             <span class="btn-icon">🔄</span>
             <span>Refresh Token</span>
           </button>
+          <button id="btnCheckWaf" class="btn btn-warning" title="Lihat Bukti Blokir WAF & Support ID">
+            <span class="btn-icon">🚨</span>
+            <span>Bukti Blokir WAF</span>
+          </button>
           <button id="btnToggleDetails" class="btn btn-ghost" title="Lihat Payload Token">
             <span class="btn-icon">🔍</span>
             <span>Token Details</span>
@@ -119,7 +123,57 @@
       </div>
     </section>
 
-    <!-- Main Tableau Visualization Container -->
+    <!-- WAF Block Diagnostics Modal -->
+    <div id="wafModal" class="waf-modal hidden">
+      <div class="waf-modal-dialog">
+        <div class="waf-modal-header">
+          <div class="waf-title">
+            <span class="waf-badge">WAF BLOCKED</span>
+            <h3>🚨 Bukti Penolakan Firewall Diskominfotik (Support ID)</h3>
+          </div>
+          <button id="btnCloseWafModal" class="btn-close">&times;</button>
+        </div>
+        <div class="waf-modal-body">
+          <!-- Summary Cards -->
+          <div class="waf-summary-grid">
+            <div class="waf-card">
+              <span class="card-label">URL Endpoint Terdampak</span>
+              <code class="card-val" id="wafUrlText">https://data-statistik.jakarta.go.id/vizportal/api/web/v1/auth/embed/signin</code>
+            </div>
+            <div class="waf-card">
+              <span class="card-label">HTTP Method Ditolak</span>
+              <span class="card-val highlight">OPTIONS (CORS Preflight)</span>
+            </div>
+            <div class="waf-card red-highlight">
+              <span class="card-label">Support ID WAF</span>
+              <span class="card-val support-id" id="wafSupportIdDisplay">Sedang memeriksa...</span>
+            </div>
+          </div>
+
+          <!-- Description and actions -->
+          <div class="waf-alert-box">
+            <p><strong>Penyebab Dashboard Gagal Terbuka:</strong> Request preflight <code>OPTIONS</code> dari browser dicegat oleh Web Application Firewall (WAF) Diskominfotik sebelum sampai ke server Tableau.</p>
+            <div class="waf-action-buttons">
+              <a id="btnWaCallCenter" href="#" target="_blank" class="btn btn-success">
+                <span>💬 Hubungi WA Call Center UP LTIK</span>
+              </a>
+              <button id="btnCopyReportText" class="btn btn-secondary">
+                <span>📋 Salin Draf Laporan Tiket Lengkap</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Embedded Raw HTML from WAF -->
+          <div class="waf-preview-container">
+            <div class="preview-header">
+              <span>Tampilan Asli Halaman Blokir WAF Diskominfotik:</span>
+            </div>
+            <iframe id="wafHtmlFrame" class="waf-frame" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <main class="viz-wrapper">
       <!-- Loading State Overlay -->
       <div id="loadingOverlay" class="viz-overlay hidden">

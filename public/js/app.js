@@ -15,6 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const tokenPayloadDisplay = document.getElementById('tokenPayloadDisplay');
   const rawTokenDisplay = document.getElementById('rawTokenDisplay');
   const btnCopyToken = document.getElementById('btnCopyToken');
+
+  // WAF Modal Elements
+  const btnCheckWaf = document.getElementById('btnCheckWaf');
+  const wafModal = document.getElementById('wafModal');
+  const btnCloseWafModal = document.getElementById('btnCloseWafModal');
+  const wafSupportIdDisplay = document.getElementById('wafSupportIdDisplay');
+  const wafHtmlFrame = document.getElementById('wafHtmlFrame');
+  const btnWaCallCenter = document.getElementById('btnWaCallCenter');
+  const btnCopyReportText = document.getElementById('btnCopyReportText');
+
   const emptyState = document.getElementById('emptyState');
   const loadingOverlay = document.getElementById('loadingOverlay');
   const overlaySubText = document.getElementById('overlaySubText');
@@ -151,14 +161,19 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStatus('error', 'Embedding Error');
         const detail = event.detail ? JSON.stringify(event.detail) : 'Viz Error';
         showError(`Tableau Server mengembalikan error: ${detail}`);
+        checkAndShowWafBlock();
       });
 
-      // Safety timeout: jika 10 detik belum interactive, tetap sembunyikan loading overlay
-      // agar iframe Tableau di bawahnya terlihat (jika Tableau menampilkan pesan/login box sendiri)
+      // Safety timeout: jika 10 detik belum interactive, periksa apakah terjadi blokir WAF
       setTimeout(() => {
-        console.log('⏱️ [Tableau] Safety timeout tercapai, memastikan loading overlay disembunyikan.');
+        console.log('⏱️ [Tableau] Safety timeout tercapai.');
         hideLoading();
-      }, 8000);
+        // Cek jika viz belum interactive dan mount viz gagal load
+        if (!document.querySelector('tableau-viz iframe')) {
+          console.warn('⚠️ [Tableau] Iframe belum ter-render, kemungkinan besar dicegat WAF CORS.');
+          checkAndShowWafBlock();
+        }
+      }, 7000);
 
       activeViz = viz;
       vizMount.appendChild(viz);
@@ -167,8 +182,18 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       hideLoading();
       showError(err.message);
+      checkAndShowWafBlock();
     }
   }
+
+  // Tangkap error fetch unhandled (CORS Preflight failure dari Tableau library)
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason && (event.reason.message || '').includes('Failed to fetch')) {
+      console.warn('🚨 [Tableau] CORS fetch error terdeteksi! Membuka bukti blokir WAF...');
+      hideLoading();
+      checkAndShowWafBlock();
+    }
+  });
 
   // 5. Status & UI Helper Functions
   function updateStatus(state, text) {
@@ -224,6 +249,66 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTimer();
     countdownInterval = setInterval(updateTimer, 1000);
   }
+
+  // 6. WAF Diagnostics Checker
+  let currentWafData = null;
+
+  async function checkAndShowWafBlock() {
+    wafModal.classList.remove('hidden');
+    wafSupportIdDisplay.textContent = 'Memeriksa WAF...';
+    try {
+      const res = await fetch('/api/check-waf');
+      const data = await res.json();
+      currentWafData = data;
+
+      if (data.blockedByWaf) {
+        wafSupportIdDisplay.textContent = data.supportId;
+        btnWaCallCenter.href = `https://api.whatsapp.com/send/?phone=6281313588684&text=Halo%20Admin%20UP%20LTIK,%20Saya%20terkena%20blokir%20WAF%20Support%20ID%20${data.supportId}%20pada%20endpoint%20Tableau%20auth/embed/signin`;
+        
+        // Inject HTML into iframe
+        if (wafHtmlFrame && data.wafHtml) {
+          wafHtmlFrame.srcdoc = data.wafHtml;
+        }
+      } else {
+        wafSupportIdDisplay.textContent = 'Tidak Terblokir';
+        wafSupportIdDisplay.style.color = '#10b981';
+      }
+    } catch (e) {
+      console.error('Error fetching WAF status:', e);
+      wafSupportIdDisplay.textContent = 'Error koneksi';
+    }
+  }
+
+  btnCheckWaf.addEventListener('click', () => {
+    checkAndShowWafBlock();
+  });
+
+  btnCloseWafModal.addEventListener('click', () => {
+    wafModal.classList.add('hidden');
+  });
+
+  btnCopyReportText.addEventListener('click', () => {
+    const spId = (currentWafData && currentWafData.supportId) || '435440845153598883';
+    const reportText = `Yth. UP LTIK / Tim Keamanan Jaringan Diskominfotik,
+
+Mohon bantuan permohonan whitelist HTTP Method "OPTIONS" (CORS Preflight) untuk integrasi Web Embed Tableau Server:
+
+• URL Target: https://data-statistik.jakarta.go.id/vizportal/api/web/v1/auth/embed/signin
+• HTTP Method: OPTIONS
+• Origin: https://tableau-jwt-embed-chat.vercel.app
+• Support ID WAF: ${spId}
+
+Dampak:
+Browser memblokir token handshake Tableau JWT karena preflight OPTIONS dicegat oleh WAF (URL Yang Diminta Ditolak).
+
+Mohon diizinkan method OPTIONS pada path /vizportal/api/web/v1/auth/embed/signin agar dapat diteruskan ke upstream Tableau Server. Terima kasih!`;
+
+    navigator.clipboard.writeText(reportText);
+    btnCopyReportText.innerHTML = '<span>Tersalin ke Clipboard! ✓</span>';
+    setTimeout(() => {
+      btnCopyReportText.innerHTML = '<span>📋 Salin Draf Laporan Tiket Lengkap</span>';
+    }, 2500);
+  });
 
   // Event Handlers
   btnEmbed.addEventListener('click', () => {

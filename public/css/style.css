@@ -245,10 +245,186 @@ body {
   border: 1px dashed var(--border-color);
 }
 
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
+.btn-warning {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: white;
+  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.4);
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #b45309, #d97706);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  box-shadow: 0 2px 10px rgba(5, 150, 105, 0.4);
+  text-decoration: none;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #047857, #059669);
+  transform: translateY(-1px);
+}
+
+/* WAF Modal */
+.waf-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.waf-modal.hidden {
+  display: none;
+}
+
+.waf-modal-dialog {
+  background: #182234;
+  border: 1px solid #dc2626;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.waf-modal-header {
+  padding: 16px 24px;
+  background: #0f172a;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.waf-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.waf-badge {
+  background: #dc2626;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.waf-modal-header h3 {
+  font-size: 15px;
+  font-weight: 700;
   color: #fff;
-  border-color: #64748b;
+}
+
+.waf-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.waf-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.waf-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.waf-card.red-highlight {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.card-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  word-break: break-all;
+}
+
+.card-val.highlight {
+  color: #fbbf24;
+}
+
+.card-val.support-id {
+  font-size: 16px;
+  font-family: var(--font-mono);
+  color: #ef4444;
+  font-weight: 800;
+}
+
+.waf-alert-box {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px dashed #ef4444;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.waf-action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.waf-preview-container {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview-header {
+  background: #0f172a;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  border-bottom: 1px solid #334155;
+}
+
+.waf-frame {
+  width: 100%;
+  height: 260px;
+  border: none;
+  background: #ffc741;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Preset Chips */
