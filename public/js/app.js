@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function mountViz(viewUrl, username) {
     hideError();
     emptyState.classList.add('hidden');
+    emptyState.style.display = 'none';
     showLoading('Membuat sesi autentikasi JWT Connected Apps...');
 
     try {

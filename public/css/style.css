@@ -600,6 +600,10 @@ tableau-viz {
   max-width: 500px;
 }
 
+.empty-state.hidden {
+  display: none !important;
+}
+
 .empty-art {
   font-size: 56px;
   margin-bottom: 16px;
